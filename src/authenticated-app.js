@@ -8,6 +8,8 @@ import * as mq from './styles/media-queries'
 import * as colors from './styles/colors'
 import {DiscoverBooksScreen} from './screens/discover'
 import {BookScreen} from './screens/book'
+import {ReadingListScreen} from './screens/reading-list'
+import {FinishedScreen} from './screens/finished'
 import {NotFoundScreen} from './screens/not-found'
 
 function AuthenticatedApp({user, logout}) {
@@ -111,6 +113,12 @@ function Nav() {
         }}
       >
         <li>
+          <NavLink to="/list">Reading List</NavLink>
+        </li>
+        <li>
+          <NavLink to="/finished">Finished Books</NavLink>
+        </li>
+        <li>
           <NavLink to="/discover">Discover</NavLink>
         </li>
       </ul>
@@ -121,6 +129,8 @@ function Nav() {
 function AppRoutes({user}) {
   return (
     <Routes>
+      <Route path="/list" element={<ReadingListScreen user={user} />} />
+      <Route path="/finished" element={<FinishedScreen user={user} />} />
       <Route path="/discover" element={<DiscoverBooksScreen user={user} />} />
       <Route path="/book/:bookId" element={<BookScreen user={user} />} />
       <Route path="*" element={<NotFoundScreen />} />
