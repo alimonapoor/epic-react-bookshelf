@@ -5,13 +5,8 @@ import {useListItems} from 'utils/list-items'
 import {BookListUL} from './lib'
 import {BookRow} from './book-row'
 
-function ListItemList({
-  user,
-  filterListItems,
-  noListItems,
-  noFilteresListItems,
-}) {
-  const listItems = useListItems(user)
+function ListItemList({filterListItems, noListItems, noFilteresListItems}) {
+  const listItems = useListItems()
 
   const filteredListItems = listItems?.filter(filterListItems)
 
@@ -31,7 +26,7 @@ function ListItemList({
     <BookListUL>
       {filteredListItems.map(listItem => (
         <li key={listItem.id}>
-          <BookRow user={user} book={listItem.book} />
+          <BookRow book={listItem.book} />
         </li>
       ))}
     </BookListUL>

@@ -1,5 +1,6 @@
+import React from 'react'
 import {useQuery, queryCache} from 'react-query'
-import {client} from './api-client'
+import {useClient} from 'context/auth-context'
 import bookPlaceholderSvg from 'assets/book-placeholder.svg'
 
 const loadingBook = {
@@ -15,7 +16,7 @@ const loadingBooks = Array.from({length: 10}, (v, index) => ({
   ...loadingBook,
 }))
 
-const getBookSearchConfig = (query, user) => ({
+const getBookSearchConfig = (query, client) => ({
   queryKey: ['bookSearch', {query}],
   queryFn: () =>
     client(`books?query=${encodeURIComponent(query)}`, {
@@ -30,27 +31,39 @@ const getBookSearchConfig = (query, user) => ({
   },
 })
 
-function useBookSearch(query, user) {
-  const result = useQuery(getBookSearchConfig(query, user))
+function useBookSearch(query) {
+  const client = useClient()
+  const result = useQuery(getBookSearchConfig(query, client))
   return {...result, books: result.data ?? loadingBooks}
 }
 
-function useBook(bookId, user) {
+function useBook(bookId) {
+  const client = useClient()
   const {data} = useQuery({
     queryKey: ['book', {bookId}],
-    queryFn: () =>
-      client(`books/${bookId}`, {token: user.token}).then(data => data.book),
+    queryFn: () => client(`books/${bookId}`).then(data => data.book),
   })
   return data ?? loadingBook
 }
 
-function refetchBookSearchQuery(user) {
-  queryCache.removeQueries('bookSearch')
-  queryCache.prefetchQuery(getBookSearchConfig('', user))
+function useRefetchBookSearchQuery() {
+  const client = useClient()
+  return React.useCallback(
+    async function refetchBookSearchQuery() {
+      queryCache.removeQueries('bookSearch')
+      await queryCache.prefetchQuery(getBookSearchConfig('', client))
+    },
+    [client],
+  )
+}
+
+const bookQueryConfig = {
+  staleTime: 1000 * 60 * 60,
+  cacheTime: 1000 * 60 * 60,
 }
 
 function setQueryDataForBook(book) {
-  queryCache.setQueryData(['book', {bookId: book.id}], book)
+  queryCache.setQueryData(['book', {bookId: book.id}], book, bookQueryConfig)
 }
 
-export {useBook, useBookSearch, refetchBookSearchQuery, setQueryDataForBook}
+export {useBook, useBookSearch, useRefetchBookSearchQuery, setQueryDataForBook}
