@@ -6,39 +6,20 @@ import debounceFn from 'debounce-fn'
 import {FaRegCalendarAlt} from 'react-icons/fa'
 import Tooltip from '@reach/tooltip'
 import {useParams} from 'react-router-dom'
-import {useQuery, useMutation, queryCache} from 'react-query'
-import {client} from 'utils/api-client'
+import {useBook} from 'utils/books'
+import {useUpdateListItem, useListItem} from 'utils/list-items'
 import {formatDate} from 'utils/misc'
 import * as mq from 'styles/media-queries'
 import * as colors from 'styles/colors'
-import {Textarea} from 'components/lib'
+import {Textarea, ErrorMessage, Spinner} from 'components/lib'
 import {Rating} from 'components/rating'
 import {StatusButtons} from 'components/status-buttons'
-import bookPlaceholderSvg from 'assets/book-placeholder.svg'
-
-const loadingBook = {
-  title: 'Loading...',
-  author: 'loading...',
-  coverImageUrl: bookPlaceholderSvg,
-  publisher: 'Loading Publishing',
-  synopsis: 'Loading...',
-  loadingBook: true,
-}
 
 function BookScreen({user}) {
   const {bookId} = useParams()
-  const {data: book = loadingBook} = useQuery({
-    queryKey: ['book', {bookId}],
-    queryFn: () =>
-      client(`books/${bookId}`, {token: user.token}).then(data => data.book),
-  })
+  const book = useBook(bookId, user)
 
-  const {data: listItems} = useQuery({
-    queryKey: 'list-items',
-    queryFn: () =>
-      client(`list-items`, {token: user.token}).then(data => data.listItems),
-  })
-  const listItem = listItems?.find(li => li.bookId === bookId) ?? null
+  const listItem = useListItem(user, bookId)
 
   const {title, author, coverImageUrl, publisher, synopsis} = book
 
@@ -86,7 +67,10 @@ function BookScreen({user}) {
               )}
             </div>
           </div>
-          <div>
+          <div css={{marginTop: 10, height: 46}}>
+            {listItem?.finishDate ? (
+              <Rating user={user} listItem={listItem} />
+            ) : null}
             {listItem ? <ListItemTimeFrame listItem={listItem} /> : null}
           </div>
           <br />
@@ -119,19 +103,8 @@ function ListItemTimeFrame({listItem}) {
 }
 
 function NotesTextarea({listItem, user}) {
-  const [mutate] = useMutation(
-    updates =>
-      client(`list-items/${updates.id}`, {
-        method: 'PUT',
-        data: updates,
-        token: user.token,
-      }),
-    {onSettled: () => queryCache.invalidateQueries('list-items')},
-  )
-  const debouncedMutate = React.useMemo(
-    () => debounceFn(mutate, {wait: 300}),
-    [mutate],
-  )
+  const [mutate, {error, isError, isLoading}] = useUpdateListItem(user)
+  const debouncedMutate = React.useCallback(debounceFn(mutate, {wait: 300}), [])
 
   function handleNotesChange(e) {
     debouncedMutate({id: listItem.id, notes: e.target.value})
@@ -152,6 +125,14 @@ function NotesTextarea({listItem, user}) {
         >
           Notes
         </label>
+        {isError ? (
+          <ErrorMessage
+            error={error}
+            variant="inline"
+            css={{marginLeft: 6, fontSize: '0.7em'}}
+          />
+        ) : null}
+        {isLoading ? <Spinner /> : null}
       </div>
       <Textarea
         id="notes"

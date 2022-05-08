@@ -4,6 +4,7 @@ import * as React from 'react'
 import * as auth from 'auth-provider'
 import {BrowserRouter as Router} from 'react-router-dom'
 import {FullPageSpinner} from './components/lib'
+import {queryCache} from 'react-query'
 import * as colors from './styles/colors'
 import {client} from './utils/api-client'
 import {useAsync} from './utils/hooks'
@@ -41,6 +42,7 @@ function App() {
   const register = form => auth.register(form).then(user => setData(user))
   const logout = () => {
     auth.logout()
+    queryCache.clear()
     setData(null)
   }
 

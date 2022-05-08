@@ -3,7 +3,8 @@ import {jsx} from '@emotion/react'
 
 import * as React from 'react'
 import {Routes, Route, Link, useMatch} from 'react-router-dom'
-import {Button} from './components/lib'
+import {ErrorBoundary} from 'react-error-boundary'
+import {Button, ErrorMessage, FullPageErrorFallback} from './components/lib'
 import * as mq from './styles/media-queries'
 import * as colors from './styles/colors'
 import {DiscoverBooksScreen} from './screens/discover'
@@ -12,9 +13,24 @@ import {ReadingListScreen} from './screens/reading-list'
 import {FinishedScreen} from './screens/finished'
 import {NotFoundScreen} from './screens/not-found'
 
+function ErrorFallback({error}) {
+  return (
+    <ErrorMessage
+      error={error}
+      css={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    />
+  )
+}
+
 function AuthenticatedApp({user, logout}) {
   return (
-    <React.Fragment>
+    <ErrorBoundary FallbackComponent={FullPageErrorFallback}>
       <div
         css={{
           display: 'flex',
@@ -49,10 +65,12 @@ function AuthenticatedApp({user, logout}) {
           <Nav />
         </div>
         <main css={{width: '100%'}}>
-          <AppRoutes user={user} />
+          <ErrorBoundary FallbackComponent={FullPageErrorFallback}>
+            <AppRoutes user={user} />
+          </ErrorBoundary>
         </main>
       </div>
-    </React.Fragment>
+    </ErrorBoundary>
   )
 }
 
