@@ -13,11 +13,16 @@ async function getUser() {
 
   const token = await auth.getToken()
   if (token) {
-    const data = await client('me', {token})
+    const data = await client('bootstrap', {token})
+    queryCache.setQueryData('list-items', data.listItems, {
+      staleTime: 5000,
+    })
     user = data.user
   }
   return user
 }
+
+const userPromise = getUser()
 
 const AuthContext = React.createContext()
 AuthContext.displayName = 'AuthContext'
@@ -36,7 +41,7 @@ function AuthProvider(props) {
   } = useAsync()
 
   React.useEffect(() => {
-    run(getUser())
+    run(userPromise)
   }, [run])
 
   const login = form => auth.login(form).then(user => setData(user))
