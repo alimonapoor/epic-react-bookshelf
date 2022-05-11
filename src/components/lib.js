@@ -7,7 +7,6 @@ import {keyframes} from '@emotion/react'
 import * as colors from 'styles/colors'
 import * as mq from 'styles/media-queries'
 import {Dialog as ReachDialog} from '@reach/dialog'
-import '@reach/dialog/styles.css'
 import {FaSpinner} from 'react-icons/fa'
 
 const spin = keyframes({
@@ -132,7 +131,11 @@ const errorMessageVariants = {
 
 function ErrorMessage({error, variant = 'stacked', ...props}) {
   return (
-    <div>
+    <div
+      role="alert"
+      css={[{color: colors.danger}, errorMessageVariants[variant]]}
+      {...props}
+    >
       <span>There was an error: </span>
       <pre
         css={[

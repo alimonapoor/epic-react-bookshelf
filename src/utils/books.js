@@ -19,9 +19,7 @@ const loadingBooks = Array.from({length: 10}, (v, index) => ({
 const getBookSearchConfig = (query, client) => ({
   queryKey: ['bookSearch', {query}],
   queryFn: () =>
-    client(`books?query=${encodeURIComponent(query)}`, {
-      token: user.token,
-    }).then(data => data.books),
+    client(`books?query=${encodeURIComponent(query)}`).then(data => data.books),
   config: {
     onSuccess(books) {
       for (const book of books) {
