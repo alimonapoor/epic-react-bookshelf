@@ -66,12 +66,14 @@ function BookScreen() {
                 {book.loadingBook ? null : <StatusButtons book={book} />}
               </div>
             </div>
-            <div css={{marginTop: 10, height: 46}}>
+            <div css={{marginTop: 10, minHeight: 46}}>
               {listItem?.finishDate ? <Rating listItem={listItem} /> : null}
-              {listItem ? <ListItemTimeFrame listItem={listItem} /> : null}
+              {listItem ? <ListItemTimeframe listItem={listItem} /> : null}
             </div>
             <br />
-            <p>{synopsis}</p>
+            <p css={{whiteSpace: 'break-spaces', display: 'block'}}>
+              {synopsis}
+            </p>
           </div>
         </div>
         {!book.loadingBook && listItem ? (
@@ -82,18 +84,18 @@ function BookScreen() {
   )
 }
 
-function ListItemTimeFrame({listItem}) {
+function ListItemTimeframe({listItem}) {
   const timeframeLabel = listItem.finishDate
     ? 'Start and finish date'
-    : 'Start Date'
+    : 'Start date'
 
   return (
     <Tooltip label={timeframeLabel}>
       <div aria-label={timeframeLabel} css={{marginTop: 6}}>
         <FaRegCalendarAlt css={{marginTop: -2, marginRight: 5}} />
         <span>
-          {formatDate(listItem.startDate)}
-          {listItem.finishDate ? `- ${formatDate(listItem.finishDate)}` : null}
+          {formatDate(listItem.startDate)}{' '}
+          {listItem.finishDate ? `— ${formatDate(listItem.finishDate)}` : null}
         </span>
       </div>
     </Tooltip>
@@ -102,6 +104,7 @@ function ListItemTimeFrame({listItem}) {
 
 function NotesTextarea({listItem}) {
   const [mutate, {error, isError, isLoading}] = useUpdateListItem()
+
   const debouncedMutate = React.useMemo(
     () => debounceFn(mutate, {wait: 300}),
     [mutate],
@@ -128,9 +131,9 @@ function NotesTextarea({listItem}) {
         </label>
         {isError ? (
           <ErrorMessage
-            error={error}
             variant="inline"
-            css={{marginLeft: 6, fontSize: '0.7em'}}
+            error={error}
+            css={{fontSize: '0.7em'}}
           />
         ) : null}
         {isLoading ? <Spinner /> : null}

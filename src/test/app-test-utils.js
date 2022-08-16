@@ -20,7 +20,6 @@ async function render(ui, {route = '/list', user, ...renderOptions} = {}) {
   }
 
   await waitForLoadingToFinish()
-
   return returnValue
 }
 
